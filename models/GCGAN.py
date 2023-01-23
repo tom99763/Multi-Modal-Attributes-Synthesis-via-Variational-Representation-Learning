@@ -1,3 +1,25 @@
+import sys
+sys.path.append('./models')
+import tensorflow as tf
+from modules import *
+from losses import *
+from discriminators import *
+
+class Generator(tf.keras.Model):
+  def __init__(self, config):
+    super().__init__()
+    
+  def call(self, x):
+    pass
+  
+  def encode(self, x):
+    pass
+  
+  def decode(self, c, f):
+    pass
+  
+  def reparameterize(self, mu, logvar, eps=None):
+    pass
 
 
 class GCGAN(tf.keras.Model):
@@ -17,6 +39,7 @@ class GCGAN(tf.keras.Model):
       ###forward
       ca, fa = self.G.encode(xa)
       cb, fb = self.G.encode(xb)
+      c = tf.concat([ca, cb], axis=0)
       f = tf.concat([fa, fb], axis=0)
       
       #vae
@@ -28,9 +51,7 @@ class GCGAN(tf.keras.Model):
       logvar = tf.concat([logvara, logvarb], axis=0)
       
       #reconstruction
-      xaa = self.G.decode(ca, fa)
-      xbb = self.G.decode(cb, fb)
-      xr = tf.concat([xaa, xbb], axis=0)
+      xr = self.G(x)
       
       #translation
       xab = self.G.decode(ca, zb)
