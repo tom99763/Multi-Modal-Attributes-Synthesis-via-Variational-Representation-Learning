@@ -85,9 +85,9 @@ class ConvBlock(layers.Layer):
                  kernel_size,
                  strides=(1, 1),
                  padding='valid',
-                 use_bias=True,
                  norm_layer=None,
                  activation='linear',
+                 use_bias=True,
                  **kwargs):
         super(ConvBlock, self).__init__(**kwargs)
         initializer = tf.random_normal_initializer(0., 0.02)
