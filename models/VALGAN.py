@@ -56,7 +56,7 @@ class Generator(tf.keras.Model):
     z = self.reparameterize(mu, logvar, eps)
     return z
 
-class GCGAN(tf.keras.Model):
+class VALGAN(tf.keras.Model):
   def __init__(self, config):
     super().__init__()
     
