@@ -2,8 +2,9 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras import callbacks
 import os
+import numpy as np
 
-def random(params, opt, ds_val, model):
+def random(epoch, params, opt, ds_val, model):
   for x, y in ds_val.take(1):
     x = x[:opt.num_samples]
     y = y[:opt.num_samples]
@@ -35,7 +36,7 @@ def random(params, opt, ds_val, model):
  
   plt.savefig(f'{dir}/{epoch}.png')
   
-def reference(parmas, opt, ds_val, model):
+def reference(epoch, parmas, opt, ds_val, model):
   for x, y in ds_val.take(1):
     x = x[:opt.num_samples]
     y = y[:opt.num_samples]
@@ -72,10 +73,6 @@ def reference(parmas, opt, ds_val, model):
         ax[i + 1, j + 1].axis('off')
         k += 1
   plt.tight_layout()
-
-  dir = f'{opt.output_dir}/{opt.model}/{params}'
-  if not os.path.exists(dir):
-    os.makedirs(dir)
     
   dir = f'{opt.output_dir}/{opt.model}/{params}/reference'
   if not os.path.exists(dir):
@@ -84,8 +81,32 @@ def reference(parmas, opt, ds_val, model):
   plt.savefig(f'{dir}/{epoch}.png')
 
 
-def feature(params, opt, ds_val, model):
-  pass
+def feature(epoch, params, opt, ds_val, model):
+  tsne = TSNE()
+  
+  features = []
+  labels = []
+  
+  for x, y in ds_val:
+    c, f = model.G.encode(x)
+    features.append(f)
+    labels.append(y)
+    
+  features = tf.concat(features, axis=0).numpy()
+  labels = tf.concat(labels, axis=0).numpy()
+  features = tsne.fit_transform(features)
+  
+  plt.figure()
+  for i in np.unique(labels):
+    x = features[labels == i]
+    plt.scatter(x[:, 0], x[:, 1], label=class_map[i], s=10, alpha=0.5)
+  plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    
+  dir = f'{opt.output_dir}/{opt.model}/{params}/features'
+  if not os.path.exists(dir):
+    os.makedirs(dir)
+  plt.savefig(f'{dir}/{epoch}.png', bbox_inches='tight')
+  
 
 class VizCallback(callbacks.Callback):
     def __init__(self, params, opt, ds_val):
@@ -95,6 +116,6 @@ class VizCallback(callbacks.Callback):
         self.params_ = params
 
     def on_epoch_end(self, epoch, logs=None):
-        random(self.params, self.opt, self.ds_val)
-        reference(self.params, self.opt, self.ds_val)
-        feature(self.params, self.opt, self.ds_val)
+        random(epoch, self.params, self.opt, self.ds_val)
+        reference(epoch, self.params, self.opt, self.ds_val)
+        feature(epoch, self.params, self.opt, self.ds_val)
