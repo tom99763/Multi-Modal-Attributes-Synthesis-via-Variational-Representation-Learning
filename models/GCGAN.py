@@ -10,7 +10,8 @@ class Generator(tf.keras.Model):
     super().__init__()
     self.E=Encoder(config)
     self.D=Decoder(config)
-    self.emb = layers.Embedding(config['num_classes'], config['latent_dim'])
+    self.emb_mu = layers.Embedding(config['num_classes'], config['latent_dim'])
+    self.emb_logvar = layers.Embedding(config['num_classes'], config['latent_dim'])
     
   def call(self, x):
     c, f = self.encode(x)
@@ -33,8 +34,14 @@ class Generator(tf.keras.Model):
     return z
   
   def encode_emb(self, y):
-    return self.emb(y)
-
+    mu = self.emb_mu(y)
+    logvar = self.emb_logvar(y)
+    return mu, logvar
+  
+  def sample(self, y, eps=None):
+    mu, logvar = self.encode_emb(y)
+    z = self.reparameterize(mu, logvar, eps)
+    return z
 
 class GCGAN(tf.keras.Model):
   def __init__(self, config):
