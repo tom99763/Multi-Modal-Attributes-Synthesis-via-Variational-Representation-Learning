@@ -172,3 +172,13 @@ class VRLGAN(tf.keras.Model):
     self.optimizer[0].apply_gradients(zip(Ggrads, self.G.trainable_weights))
     self.optimizer[1].apply_gradients(zip(Dgrads, self.D.trainable_weights))
     return {'lr':lr, 'lkld':lkld, 'lcls_g':lcls_g, 'lcls_d':lcls_d, 'lg':lg, 'ld':ld}
+  
+  def test_step(self, inputs):
+    x, y = inputs
+    xr = self.G(x)
+    ssim = tf.reduce_mean(tf.image.ssim(x, xr))
+    psnr = tf.reduce_mean(tf.image.psnr(x, xr))
+    return {'ssim':ssim, 'psnr': psnr}
+    
+    
+    
