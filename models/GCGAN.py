@@ -86,7 +86,7 @@ class GCGAN(tf.keras.Model):
       ###compute loss
       lr = l1_loss(x, xr)
       lg, ld = gan_loss(critic_real, critic_fake, self.config['gan_loss'])
-      lkld = kl_div(f, mu, logvar)
+      lkld = tf.reduce_mean(nll(f, 0. ,0.) - nll(f, mu, logvar))
       lcls_g, lcls_d = crossentropy(y, logits_fake), crossentropy(y, logits_real)
       g_loss = self.config['lambda_lr'] * lr + self.config['lambda_kld'] * lkld +\
                self.config['lambda_cls'] * lcls_g + lg
