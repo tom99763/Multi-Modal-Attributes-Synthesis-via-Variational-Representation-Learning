@@ -8,18 +8,30 @@ from discriminators import *
 class Generator(tf.keras.Model):
   def __init__(self, config):
     super().__init__()
+    self.E=Encoder(config)
+    self.D=Decoder(config)
+    self.emb = layers.Embedding(config['num_classes'], config['latent_dim'])
     
   def call(self, x):
     pass
   
   def encode(self, x):
-    pass
+    c = self.E.Ec(x)
+    f = self.E.Ef(x)
+    return c, f
   
   def decode(self, c, f):
-    pass
+    x = self.D([c, f])
+    return x
   
   def reparameterize(self, mu, logvar, eps=None):
-    pass
+    if eps is None:
+      eps = tf.random.normal(mu.shape)
+    z = mu + tf.exp(0.5 * logvar) * eps
+    return z
+  
+  def encode_emb(self, y):
+    return self.emb(y)
 
 
 class GCGAN(tf.keras.Model):
