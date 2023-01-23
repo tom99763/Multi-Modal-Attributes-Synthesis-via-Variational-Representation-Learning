@@ -25,12 +25,15 @@ def random(params, opt, ds_val, model):
       ax[i+1, j].axis('off')
       
   plt.tight_layout()
-  dir = f'{self.opt.output_dir}/{self.opt.model}/{self.params_}'
+  dir = f'{opt.output_dir}/{opt.model}/{params}'
   if not os.path.exists(dir):
     os.makedirs(dir)
+    
+  dir = f'{opt.output_dir}/{opt.model}/{params}/random'
+  if not os.path.exists(dir):
+    os.makedirs(dir)
+ 
   plt.savefig(f'{dir}/{epoch}.png')
-
-  
   
 def reference(parmas, opt, ds_val, model):
   for x, y in ds_val.take(1):
@@ -52,10 +55,10 @@ def reference(parmas, opt, ds_val, model):
 
   for k in range(b + 1):
     if k == 0:
-      ax[0, k].imshow(tf.ones(source[0].shape))
+      ax[0, k].imshow(tf.ones(src[0].shape))
       ax[0, k].axis('off')
     else:
-      ax[0, k].imshow(source[k - 1])
+      ax[0, k].imshow(src[k - 1])
       ax[0, k].axis('off')
 
   for k in range(1, b + 1):
@@ -70,9 +73,14 @@ def reference(parmas, opt, ds_val, model):
         k += 1
   plt.tight_layout()
 
-  dir = f'{opt.output_dir}/{opt.model}/image_{key_var}'
+  dir = f'{opt.output_dir}/{opt.model}/{params}'
   if not os.path.exists(dir):
     os.makedirs(dir)
+    
+  dir = f'{opt.output_dir}/{opt.model}/{params}/reference'
+  if not os.path.exists(dir):
+    os.makedirs(dir)
+ 
   plt.savefig(f'{dir}/{epoch}.png')
 
 
