@@ -5,6 +5,19 @@ from modules import *
 from losses import *
 from discriminators import *
 
+
+class Encoder(tf.keras.Model):
+  def __init__(self, config):
+    super().__init__()
+    
+    
+    
+class Decoder(tf.keras.Model):
+  def __init__(self, config):
+    super().__init__()
+
+
+
 class Generator(tf.keras.Model):
   def __init__(self, config):
     super().__init__()
