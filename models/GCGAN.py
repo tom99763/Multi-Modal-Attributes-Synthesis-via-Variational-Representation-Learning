@@ -13,7 +13,9 @@ class Generator(tf.keras.Model):
     self.emb = layers.Embedding(config['num_classes'], config['latent_dim'])
     
   def call(self, x):
-    pass
+    c, f = self.encode(x)
+    x = self.decode(c, f)
+    return x
   
   def encode(self, x):
     c = self.E.Ec(x)
