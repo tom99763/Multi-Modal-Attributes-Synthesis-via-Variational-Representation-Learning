@@ -101,12 +101,14 @@ class VRLGAN(tf.keras.Model):
       lr = l1_loss(x, xr)
       lg, ld = gan_loss(critic_real, critic_fake, self.config['gan_loss'])
       
-      if self.config['stopgrad']:
+      if self.config['cluster_loss'] == 'nnl_self_stopgrad':
         lkld = tf.reduce_mean(nll_loss(z, 0. ,0.) - nll_loss(z, mu, logvar) + nll_loss(f, 0. ,0.) -\
                               nll_loss(f, tf.stop_gradient(mu), tf.stop_gradient(logvar)))
-      else:
+      elif self.config['cluster_loss'] == 'nnl_self':
         lkld = tf.reduce_mean(nll_loss(z, 0. ,0.) - nll_loss(z, mu, logvar) + nll_loss(f, 0. ,0.) -\
                               nll_loss(f, mu, logvar))
+      elif self.config['cluster_loss'] == 'nnl':
+        lkld = tf.reduce_mean(nll_loss(z, 0. ,0.) - nll_loss(z, mu, logvar))
         
       lcls_g, lcls_d = crossentropy(y, logits_fake), crossentropy(y, logits_real)
       g_loss = self.config['lambda_lr'] * lr + self.config['lambda_kld'] * lkld +\
