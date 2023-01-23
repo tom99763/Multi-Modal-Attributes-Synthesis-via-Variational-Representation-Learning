@@ -81,6 +81,7 @@ class GCGAN(tf.keras.Model):
       mub, logvarb = self.G.encode_emb(yb)
       za = self.G.reparameterize(mua, logvara)
       zb = self.G.reparameterize(mub, logvarb)
+      z = tf.concat([za, zb], axis=0)
       mu = tf.concat([mua, mub], axis=0)
       logvar = tf.concat([logvara, logvarb], axis=0)
       
@@ -99,7 +100,13 @@ class GCGAN(tf.keras.Model):
       ###compute loss
       lr = l1_loss(x, xr)
       lg, ld = gan_loss(critic_real, critic_fake, self.config['gan_loss'])
-      lkld = tf.reduce_mean(nll_loss(f, 0. ,0.) - nll_loss(f, mu, logvar))
+      
+      if self.config['stopgrad']:
+        lkld = tf.reduce_mean(2 * nll_loss(f, 0. ,0.) - nll_loss(z, mu, logvar) - \
+                              nll_loss(f, tf.stop_gradient(mu), tf.stop_gradient(logvar)))
+      else:
+        lkld = tf.reduce_mean(2 * nll_loss(f, 0. ,0.) - nll_loss(z, mu, logvar) - nll_loss(f, mu, logvar))
+        
       lcls_g, lcls_d = crossentropy(y, logits_fake), crossentropy(y, logits_real)
       g_loss = self.config['lambda_lr'] * lr + self.config['lambda_kld'] * lkld +\
                self.config['lambda_cls'] * lcls_g + lg
