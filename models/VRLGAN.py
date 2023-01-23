@@ -30,8 +30,8 @@ class Encoder(tf.keras.Model):
     ])
     
     self.Ef = tf.keras.Sequential([
-      ConvBlock(dim, 3, 2, 'same', 'none', act),
-      ConvBlock(dim, 3, 2, 'same', 'none', act),
+      ConvBlock(dim, 3, 2, 'same', activation = act),
+      ConvBlock(dim, 3, 2, 'same', activation = act),
       layers.GlobalAveragePooling2D(),
       layers.Dense(latent_dim)
     ])
