@@ -33,6 +33,7 @@ class Patch_Discriminator(tf.keras.Model):
         self.num_downsampls = config['num_downsamples']
         self.num_resblocks = config['num_resblocks']
         dim = config['base']
+        self.use_cls = config['use_cls']
 
         self.blocks = tf.keras.Sequential([
             ConvBlock(dim, 4, strides=2, padding='same', use_bias=self.use_bias, norm_layer=self.norm,
@@ -43,15 +44,33 @@ class Patch_Discriminator(tf.keras.Model):
             dim = dim * 2
             self.blocks.add(ConvBlock(dim, 4, strides=2, padding='same', use_bias=self.use_bias, norm_layer=self.norm,
                                       activation=tf.nn.leaky_relu))
-
-        self.blocks.add(Padding2D(1, pad_type='constant'))
-        self.blocks.add(ConvBlock(512, 4, padding='valid', use_bias=self.use_bias, norm_layer=self.norm,
-                                  activation=tf.nn.leaky_relu))
-        self.blocks.add(Padding2D(1, pad_type='constant'))
-        self.blocks.add(ConvBlock(1, 4, padding='valid'))
+            
+        self.to_critic = tf.keras.Sequential([
+            Padding2D(1, pad_type='constant'),
+            ConvBlock(512, 4, padding='valid', use_bias=self.use_bias, norm_layer=self.norm,
+                                  activation=tf.nn.leaky_relu),
+            Padding2D(1, pad_type='constant'),
+            ConvBlock(1, 4, padding='valid')
+        ])
+        
+        if self.use_cls:
+            self.to_cls = tf.keras.Sequential([
+                ConvBlock(dim, 4, 2, 'same', norm_layer=self.norm, activation=tf.nn.leaky_relu),
+                ConvBlock(dim, 4, 2, 'same', norm_layer=self.norm, activation=tf.nn.leaky_relu),
+                layers.Flatten(),
+                layers.Dense(512, activation='leaky_relu'),
+                layers.Dense(config['num_classes'])
+            ])
 
     def call(self, x):
-        return self.blocks(x)
+        x = self.blocks(x)
+        critic = self.to_critic(x)
+        
+        if self.use_cls:
+            logits = self.to_cls(x)
+            return critic, logits
+        else:
+            return critic
 
 
 class CAM_Discriminator(tf.keras.Model):
