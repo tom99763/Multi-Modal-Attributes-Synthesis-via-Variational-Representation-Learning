@@ -17,11 +17,11 @@ class Encoder(tf.keras.Model):
     act = config['act']
     
     self.blocks = tf.keras.Sequential([
-      ConvBlock(dim, 7, 1, 3, norm, act)
+      ConvBlock(dim, 7, 1, 'same', norm, act)
     ])
     
     for i in range(num_downsamples):
-      self.blocks.add(ConvBlock(dim, 3, 2, 1, norm, act))
+      self.blocks.add(ConvBlock(dim, 3, 2, 'same', norm, act))
       dim = dim *2
       
     self.Ec = tf.keras.Sequential([
@@ -29,8 +29,8 @@ class Encoder(tf.keras.Model):
     ])
     
     self.Ef = tf.keras.Sequential([
-      ConvBlock(dim, 3, 2, 1, 'none', act),
-      ConvBlock(dim, 3, 2, 1, 'none', act),
+      ConvBlock(dim, 3, 2, 'same', 'none', act),
+      ConvBlock(dim, 3, 2, 'same', 'none', act),
       layers.GlobalAveragePooling2D(),
       layers.Dense(latent_dim)
     ])
@@ -55,10 +55,10 @@ class Decoder(tf.keras.Model):
     ]
     
     self.upsample = tf.keras.Sequential([
-      TConvBlock(int(dim * 2 ** (-i)), 3, 2, 1, 'layer', act) for i in range(1, num_downsamples + 1)
+      TConvBlock(int(dim * 2 ** (-i)), 3, 2, 'same', 'layer', act) for i in range(1, num_downsamples + 1)
     ])
     
-    self.output = ConvBlock(3, 7, 1, 3, activation = 'tanh')
+    self.output = ConvBlock(3, 7, 1, 'same', activation = 'tanh')
     
   def call(self, inputs):
     c, f = inputs
