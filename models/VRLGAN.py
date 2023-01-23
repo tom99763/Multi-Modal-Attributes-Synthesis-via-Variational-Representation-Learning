@@ -4,6 +4,7 @@ import tensorflow as tf
 from modules import *
 from losses import *
 from discriminators import *
+from tensorflow.keras import layers
 
 
 class Encoder(tf.keras.Model):
