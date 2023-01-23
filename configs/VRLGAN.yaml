@@ -1,1 +1,15 @@
+base: 64
+latent_dim: 8
+num_downsamples: 2
+num_resblocks: 8
+norm: 'inst'
+act: 'relu'
+
+num_classes: 8
+cluster_loss: 'nnl_self_stopgrad'
+lambda_kld: 1.
+lambda_cls: 1.
+lambda_lr: 1.
+gan_loss: 'lsgan'
+
 
