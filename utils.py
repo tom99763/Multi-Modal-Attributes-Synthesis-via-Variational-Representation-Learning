@@ -21,11 +21,6 @@ def get_config(config):
     with open(config, 'r') as stream:
         return yaml.load(stream, Loader=yaml.FullLoader)
 
-def get_image(pth, opt):
-    image = tf.image.decode_jpeg(tf.io.read_file(pth), channels=opt.num_channels)
-    image = tf.cast(tf.image.resize(image, (opt.image_size, opt.image_size)), 'float32')
-    return (image-127.5)/127.5
-
 
 def set_callbacks(params, opt, val_ds = None):
     ckpt_dir = f"{opt.ckpt_dir}/{opt.model}"
