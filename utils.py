@@ -2,9 +2,9 @@ import os
 import tensorflow as tf
 from models import VRLGAN
 from tensorflow.keras import callbacks
-import matplotlib.pyplot as plt
 import yaml
 import numpy as np
+from visualization import VizCallback
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
@@ -34,5 +34,5 @@ def set_callbacks(params, opt, val_ds = None):
 
     checkpoint_callback = callbacks.ModelCheckpoint(filepath=f"{ckpt_dir}/{params}/{opt.model}", save_weights_only=True)
     history_callback = callbacks.CSVLogger(f"{output_dir}/{params}.csv", separator=",", append=False)
-    visualize_callback = VisualizeCallback(params, opt, val_ds)
+    visualize_callback = VizCallback(params, opt, val_ds)
     return [checkpoint_callback, history_callback, visualize_callback]
