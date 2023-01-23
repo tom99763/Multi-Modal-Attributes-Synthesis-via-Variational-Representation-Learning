@@ -9,13 +9,66 @@ from discriminators import *
 class Encoder(tf.keras.Model):
   def __init__(self, config):
     super().__init__()
+    dim = config['base']
+    latent_dim = config['latent_dim']
+    num_downsamples = config['num_downsamples']
+    num_resblocks = config['num_resblocks']
+    norm = config['norm']
+    act = config['act']
     
+    self.blocks = tf.keras.Sequential([
+      ConvBlock(dim, 7, 1, 3, norm, act)
+    ])
     
+    for i in range(num_downsamples):
+      self.blocks.add(ConvBlock(dim, 3, 2, 1, norm, act))
+      dim = dim *2
+      
+    self.Ec = tf.keras.Sequential([
+      ResBlock(dim, norm, act) for _ in range(num_resblocks//2)
+    ])
     
+    self.Ef = tf.keras.Sequential([
+      ConvBlock(dim, 3, 2, 1, 'none', act),
+      ConvBlock(dim, 3, 2, 1, 'none', act),
+      layers.GlobalAveragePooling2D(),
+      layers.Dense(latent_dim)
+    ])
+    
+  def call(self, x):
+    x = self.blocks(x)
+    c, f = self.Ec(x), self.Ef(x)
+    return c, f
+    
+
 class Decoder(tf.keras.Model):
   def __init__(self, config):
     super().__init__()
-
+    dim = config['base']
+    num_downsamples = config['num_downsamples']
+    num_resblocks = config['num_resblocks']
+    act = config['act']
+    
+    dim = dim * 2 ** num_downsamples
+    self.blocks = [
+      ResBlock(dim, 'adain', act) for _ in range(num_resblocks//2)
+    ]
+    
+    self.upsample = tf.keras.Sequential([
+      TConvBlock(int(dim * 2 ** (-i)), 3, 2, 1, 'layer', act) for i in range(1, num_downsamples + 1)
+    ])
+    
+    self.output = ConvBlock(3, 7, 1, 3, activation = 'tanh')
+    
+  def call(self, inputs):
+    c, f = inputs
+    
+    for block in self.blocks:
+      c = block([c, f])
+    
+    c = self.upsample(c)
+    c = self.output(c)
+    return c
 
 
 class Generator(tf.keras.Model):
@@ -32,8 +85,7 @@ class Generator(tf.keras.Model):
     return x
   
   def encode(self, x):
-    c = self.E.Ec(x)
-    f = self.E.Ef(x)
+    c, f = self.E(x)
     return c, f
   
   def decode(self, c, f):
