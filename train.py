@@ -25,7 +25,7 @@ def main():
     model.compile(optimizer = [optimizers.Adam(learning_rate = opt.lr, beta_1 = 0.5, beta_2 = 0.999),
                                optimizers.Adam(learning_rate = opt.lr, beta_1 = 0.5, beta_2 = 0.999)])
     ds_train, ds_val = build_dataset(opt)
-    _callbacks = set_callbacks(ds_val, params, opt)
+    _callbacks = set_callbacks(params, opt, ds_val)
     model.fit(
         x=ds_train,
         validation_data=ds_val,
