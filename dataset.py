@@ -18,11 +18,11 @@ def build_dataset(opt):
     paths += img_pth
     labels += [i] * len(img_pth)
   
-  x_train, x_val, y_train, y_val = ttp(paths, labels, test_size = opt.val_size, random_state = 999)
+  x_train, x_val, y_train, y_val = ttp(paths, labels, test_size = opt.val_size, random_state = 999, shuffle=True)
   
   ds_train = tf.data.Dataset.from_tensor_slices(
             (x_train, y_train)). \
-            map(lambda path, label: get_image(path, label, opt), num_parallel_calls=AUTOTUNE). \
+            map(lambda path, label: get_image(path, label, opt), num_parallel_calls=AUTOTUNE).shuffle(512). \
             batch(opt.batch_size, drop_remainder=True).prefetch(AUTOTUNE)
   
   ds_val = tf.data.Dataset.from_tensor_slices(
