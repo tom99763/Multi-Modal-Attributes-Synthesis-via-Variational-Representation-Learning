@@ -15,6 +15,7 @@ def parse_opt():
     parser.add_argument('--image_size', type=int, default=128)
     parser.add_argument('--val_size', type=int, default=0.4)
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
+    parser.add_argument('--num_samples', type=int, default=4)
     opt, _ = parser.parse_known_args()
     return opt
   
